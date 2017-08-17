@@ -5,6 +5,13 @@
         - mysql-server
         - mysql-client
 
+    - name: Update MySQL Configuration file to accept connections from all interfaces
+      ini_file:
+        path: /etc/mysql/my.cnf
+        section: mysqld
+        option: bind-address
+        value: 0.0.0.0
+
     - name: Start MySQL Service
       service:
         name: mysql
@@ -21,3 +28,9 @@
         priv: '*.*:ALL'
         state: present
         host: '%'
+
+    - name: Re-start MySQL Service
+      service:
+        name: mysql
+        state: restarted
+        enabled: yes

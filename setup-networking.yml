@@ -1,9 +1,6 @@
 - name: Set up networking
   hosts: localhost
   gather_facts: False
-  vars:
-    region: us-central1
-    members: us-central1-a/web-server-1,us-central1-a/web-server-2
   tasks:
     - name: Allow HTTP traffic
       gce_net:
@@ -27,7 +24,22 @@
       gce_lb:
         name: lb1
         region: "{{ region }}"
-        members: "{{ members }}"
+        members: "{{ lb_members }}"
         project_id: "{{ project_id }}"
         credentials_file: "{{ credentials_file }}"
         service_account_email: "{{ service_account_email }}"
+      register: lb_result
+
+    - name: Load balancer result
+      debug:
+        msg: "{{ lb_result }}"
+
+    - name: Send notification email
+      mail:
+        host: smtp.gmail.com
+        port: 465
+        username: mmumshad@gmail.com
+        password: "{{ g_password }}"
+        to: Mumshad Mannambeth <mmumshad@gmail.com>
+        subject: Ansible-report
+        body: 'Go to http://{{ lb_result.external_ip }} to access your web application.'
