@@ -1,0 +1,1 @@
+web_server ansible_host=35.184.165.0

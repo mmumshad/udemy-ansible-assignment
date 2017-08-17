@@ -1,0 +1,31 @@
+- name: Create instance(s)
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+   - name: Launch instances
+     gce:
+         instance_names: "{{ item }}"
+         machine_type: "{{ machine_type }}"
+         image: "{{ image }}"
+         service_account_email: "{{ service_account_email }}"
+         credentials_file: "{{ credentials_file }}"
+         project_id: "{{ project_id }}"
+     register: gce
+     with_items: "{{ instance_list }}"
+
+   - name: Wait for SSH to come up
+     wait_for: host={{ item.public_ip }} port=22 delay=10 timeout=60
+     with_items: "{{ gce.results[0].instance_data }}"
+
+   - name: Add host to web servers
+     add_host: hostname={{ item.public_ip }} private_ip={{ item.private_ip }} groupname=web_servers
+     with_items: "{{ gce.results[0].instance_data }}"
+
+   - name: Add host to db servers
+     add_host: hostname={{ item.public_ip }} private_ip={{ item.private_ip }} groupname=db_servers
+     with_items: "{{ gce.results[1].instance_data }}"
+
+   - name: Add host to lb servers
+     add_host: hostname={{ item.public_ip }} groupname=lb_servers
+     with_items: "{{ gce.results[2].instance_data }}"

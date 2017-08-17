@@ -1,0 +1,21 @@
+- name: Setup Database Server
+
+  hosts: db_servers
+  become: yes
+  become_method: sudo
+  connection: ssh
+  tasks:
+    - name: ping
+      ping:
+  roles:
+    - python
+    - mysql_db
+
+- name: Setup Web Servers
+  hosts: web_servers
+  become: yes
+  become_method: sudo
+  connection: ssh
+  roles:
+    - python
+    - flask_web
